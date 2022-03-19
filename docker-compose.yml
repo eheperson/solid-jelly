@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  web-postgres:
+    container_name: web-postgres
+    hostname: web-postgres
+    image: postgres:13.0-alpine
+    env_file:
+      - ./app/.env
+    networks:
+      - web-main-net
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    volumes:
+      - "postgresql-data:/var/lib/postgresql/data"
+    command: -p 5432
+
+  web-app:
+    container_name: web-app
+    hostname: web-app
+    build: 
+      context: ./app
+      args:
+        REPO_PATH: ./app
+      dockerfile: Dockerfile
+    env_file:
+      - ./app/.env
+    environment:
+      - "MIGRATIONS=1"
+    volumes:
+      - ./app/:/usr/src/app/
+    ports:
+      - "0.0.0.0:8006:8006"
+  #  restart: unless-stopped
+    depends_on:
+      - web-postgres
+    working_dir: /app
+    networks:
+      - web-main-net
+
+volumes:
+  postgresql-data:
+
+networks:
+  web-main-net:
+
