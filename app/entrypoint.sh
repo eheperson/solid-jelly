@@ -21,9 +21,10 @@ fi
 if [ "$MIGRATIONS" = "1" ]; then
 #	python manage.py collectstatic --noinput
     python manage.py flush --no-input
+    python manage.py makemigrations --no-input
     python manage.py migrate --noinput
 	python manage.py createsuperuser --username "$DJANGO_SUPERUSER_NAME" --no-input --email "$DJANGO_SUPER_USER_EMAIL" 
-    python manage.py runserver 0.0.0.0:8006
+    python manage.py runserver 0.0.0.0:8006 --noreload
 fi
 
 exec "$@"

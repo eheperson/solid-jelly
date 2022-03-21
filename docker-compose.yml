@@ -33,7 +33,7 @@ services:
       - ./app/:/usr/src/app/
     ports:
       - "0.0.0.0:8006:8006"
-  #  restart: unless-stopped
+    restart: always
     depends_on:
       - web-postgres
     working_dir: /app
@@ -42,7 +42,9 @@ services:
 
 volumes:
   postgresql-data:
+    driver: local
 
 networks:
   web-main-net:
+    driver: bridge
 
