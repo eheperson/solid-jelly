@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from orderbook import models
+from orderbook import models as orderbookModels
 
 class MarketSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Market
+        model = orderbookModels.Market
         fields = [
             "baseCurrencyCode",
             "counterCurrencyCode",
@@ -13,7 +13,7 @@ class MarketSerializer(serializers.ModelSerializer):
 
 class MarketDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.MarketData
+        model = orderbookModels.MarketData
         fields = [
             "market",
             "bid",
@@ -31,7 +31,7 @@ class MarketDataSerializer(serializers.ModelSerializer):
 
 class BuyerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Buyer
+        model = orderbookModels.Buyer
         fields = [
             "ordersTotalAmount",
             "ordersPrice",
@@ -41,7 +41,7 @@ class BuyerSerializer(serializers.ModelSerializer):
 
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Seller
+        model = orderbookModels.Seller
         fields = [
             "ordersTotalAmount",
             "ordersPrice",
@@ -51,7 +51,7 @@ class SellerSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Transaction
+        model = orderbookModels.Transaction
         fields = [
             "amount",
             "price",

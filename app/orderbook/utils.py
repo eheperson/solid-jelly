@@ -41,7 +41,7 @@ class OrderBookCall():
     def market(self):
         if self.status == 200:
             data = {}
-            data["market"] = self.data["ticker"]["market"]
+            data["market"] = self.data["data"]["ticker"]["market"]
             data["timestamp"] = self.timestamp
             return self.data["data"]["ticker"]
         return -1
@@ -65,69 +65,32 @@ class OrderBookCall():
         return -1
 
 
-def orderbookQuery():
-    orderbook = OrderBookCall("BTC", "USDT")
+def orderbookQuery(token_, currency_):
+    orderbook = OrderBookCall(token_, currency_)
+    market = orderbook.market()
     marketdata = orderbook.marketData()
-    sellers = orderbook.sellers()
     buyers = orderbook.buyers()
+    sellers = orderbook.sellers()
     transactions = orderbook.transactions()
 
-    if marketdata is not None:
-        try:
-            marketdataObject = models.MarketData.objects.create(bid=float(marketdata["bid"]),
-                                                        ask=float(marketdata["ask"]),
-                                                        lastPrice=float(marketdata["last_price"]),
-                                                        lastSize=float(marketdata["last_size"]),
-                                                        volume24h=float(marketdata["volume_24h"]),
-                                                        change24h=float(marketdata["change_24h"]),
-                                                        low24h=float(marketdata["low_24h"]),
-                                                        high24h=float(marketdata["high_24h"]),
-                                                        avg24h=float(marketdata["avg_24h"]),
-                                                        timestamp=float(marketdata["timestamp"]),
-                                                        )
-            marketdataObject.save()
-        except:
-            pass
+    marketObject = models.Market.save_market(market)
+    models.MarketData.save_marketdata(marketObject, marketdata)
 
-    if buyers is not None:
-        try:
-            allBuyers = buyers["buyers"]
-            timestamp = buyers["timestamp"]
-            for buyer in allBuyers:
-                buyerObject = models.Buyer.objects.create(ordersTotalAmount=float(buyer["orders_total_amount"]),
-                                                            ordersPrice=float(buyer["orders_price"]),
-                                                            timestamp=float(timestamp))
-                buyerObject.save()
-        except:
-            pass
+    models.Buyer.save_buyers(marketObject, buyers)
+    models.Seller.save_sellers(marketObject, sellers)
+    models.Transaction.save_transactions(marketObject, transactions)
+    
+def BTCUSDT_scheduler():
+    orderbookQuery("BTC", "USDT")
 
-    if sellers is not None:
-        try:
-            allSellers = sellers["sellers"]
-            timestamp = sellers["timestamp"]
-            for seller in allSellers:
-                sellerObject = models.Seller.objects.create(ordersTotalAmount=float(seller["orders_total_amount"]),
-                                                            ordersPrice=float(seller["orders_price"]),
-                                                            timestamp=float(timestamp))
-                sellerObject.save()
-        except:
-            pass
+def ETHUSDT_scheduler():
+    orderbookQuery("ETH", "USDT")
 
-    if transactions is not None:
-        try:
-            allTransactions = transactions["transactions"]
-            timestamp = transactions["timestamp"]
-            for transaction in allTransactions:
-                transactionObject = models.Transaction.objects.create(amount=float(transaction["amount"]),
-                                                                      price=float(transaction["price"]),
-                                                                      time=float(transaction["time"]),
-                                                                      type=transaction["type"])
-                transactionObject.save()
-        except:
-            pass
-
+def main_scheduler():
+    BTCUSDT_scheduler()
+    ETHUSDT_scheduler()
 
 def solidScheduler():
     scheduler = BackgroundScheduler()    
-    scheduler.add_job(orderbookQuery, "interval", seconds=10, id="orderbook_001", replace_existing=True)
+    scheduler.add_job(main_scheduler, "interval", seconds=10, id="orderbook_001", replace_existing=True)
     scheduler.start()
