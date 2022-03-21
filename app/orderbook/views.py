@@ -1,78 +1,23 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 import requests
-
-from orderbook import (
-    serializers,
-    models,
-    utils
-)
-# Create your views here
+from orderbook import utils
+# import importlib
+from django.http import JsonResponse
 
 
-class MarketViewset(viewsets.ModelViewSet):
-    serializer_class = serializers.MarketSerializer
+def BTCUSDT_view(request, days_):
+    # importlib.reload(utils)
+    res = utils.calculate_days("BTCUSDT", days_)
+    return JsonResponse(res)
 
-    def get_queryset(self):
-        pass
+def ETHUSDT_view(request, days_):
+    # importlib.reload(utils)
+    res = utils.calculate_days("ETHUSDT", days_)
+    return JsonResponse(res)
 
-    def get_market(self):
-        pass
-
-
-        
-class MarketDataViewset(viewsets.ModelViewSet):
-    serializer_class = serializers.MarketDataSerializer
-
-    def get_queryset(self): 
-        data = models.MarketData.objects.all()
-        return data
-
-    def get_marketdata(self):
-        orderbook = utils.OrderBookCall("BTC", "USDT")
-        return orderbook.marketData()
-
-    def save_marketdata(self):
-        marketdata = self.get_marketdata()
-        print(marketdata)
-        if marketdata is not None:
-            try:
-                marketdataObject = models.MarketData.objects.create(bid=float(marketdata["bid"]),
-                                                            ask=float(marketdata["ask"]),
-                                                            lastPrice=float(marketdata["last_price"]),
-                                                            lastSize=float(marketdata["last_size"]),
-                                                            volume24h=float(marketdata["volume_24h"]),
-                                                            change24h=float(marketdata["change_24h"]),
-                                                            low24h=float(marketdata["low_24h"]),
-                                                            high24h=float(marketdata["high_24h"]),
-                                                            avg24h=float(marketdata["avg_24h"]),
-                                                            timestamp=float(marketdata["timestamp"]),
-                                                            )
-                marketdataObject.save()
-            except:
-                pass
-
-
-class SellerViewset(viewsets.ModelViewSet):
-    serializer_class = serializers.SellerSerializer
-    
-    def get_queryset(self):
-        data = models.Seller.objects.all()
-        return data
-
-    def get_sellers(self):
-        orderbook = utils.OrderBookCall("BTC", "USDT")
-        return orderbook.sellers()
-
-    def save_sellers(self):
-        sellers = self.get_sellers()
-        print(sellers)
-        if sellers is not None:
-            try:
-                for key, value in sellers.items():
-                    # sellerObject = models.Seller.objects.create(ordersTotalAmount=
-                    print(key)
-                    print(value)
-            except:
-                pass
-    
+# def experimental_view(request, token_, currency_, days_):
+    # importlib.reload(utils)
+    # print(token_.upper(), currency_.upper(), days_)
+    # res = utils.experimentalDynamic(token_.upper(), currency_.upper(), days_)
+    # return JsonResponse(res)

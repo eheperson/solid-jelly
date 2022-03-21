@@ -1,6 +1,9 @@
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from orderbook import views, models
+from datetime import timedelta
+from django.utils import timezone
+
 
 class OrderBookCall():
     def __init__(self, token_, currency_):
@@ -80,17 +83,64 @@ def orderbookQuery(token_, currency_):
     models.Seller.save_sellers(marketObject, sellers)
     models.Transaction.save_transactions(marketObject, transactions)
     
-def BTCUSDT_scheduler():
-    orderbookQuery("BTC", "USDT")
-
-def ETHUSDT_scheduler():
-    orderbookQuery("ETH", "USDT")
-
 def main_scheduler():
-    BTCUSDT_scheduler()
-    ETHUSDT_scheduler()
+    # experimentalDynamic()
+    orderbookQuery('BTC', 'USDT')
+    orderbookQuery('ETH', 'USDT')
+
 
 def solidScheduler():
-    scheduler = BackgroundScheduler()    
+    scheduler = BackgroundScheduler(job_defaults={'max_instances': 5})  
     scheduler.add_job(main_scheduler, "interval", seconds=10, id="orderbook_001", replace_existing=True)
     scheduler.start()
+
+
+def calculate_days(marketCode_, lastDays_):
+    timedifference = timezone.now().date() - timedelta(days=lastDays_)
+    marketdatas = models.MarketData.objects.filter(date__gte=timedifference).filter(market__marketCode__contains=marketCode_)
+    
+    min = 0.0
+    max = 0.0
+    avg = 0.0
+    vol = 0.0
+    n = len(marketdatas)
+    res = {}
+    
+    for i in marketdatas:
+        min += i.low24h
+        max += i.high24h
+        avg += i.avg24h
+        vol += i.volume24h
+    
+    if n == 0: # zero division error
+        n=1
+
+    res["min"] = min/n
+    res["max"] = max/n
+    res["avg"] = avg/n
+    res["vol"] = vol/n
+    # print(res)
+    return res
+
+
+# def experimentalDynamic(token_, currency_, days_):
+#     import os
+#     baseDir = os.path.abspath(os.path.join(os.path.dirname(__file__), "."))
+#     utils = os.path.join(baseDir, "utils.py")
+#     res = {"error":"the signal is lost.."}
+#     with open(utils, "r") as f:
+#         lines = f.readlines()
+#         if "    orderbookQuery('{}', '{}')\n".format(token_, currency_) not in lines:
+#             index = None
+#             for i,line in enumerate(lines):
+#                 if line == "    orderbookQuery('ETH', 'USDT')\n":
+#                     index = i
+#                     break
+#             lines.insert(index-1, "    orderbookQuery('{}', '{}')\n".format(token_, currency_))
+#             with open(utils, "w") as f_inner:
+#                 f_inner.writelines(lines)
+#             res = calculate_days(token_+currency_, days_)
+#         else:
+#             res = calculate_days(token_+currency_, days_)
+
+#     return res

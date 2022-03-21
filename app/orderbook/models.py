@@ -21,12 +21,12 @@ class Market(models.Model):
     @staticmethod
     def save_market(market_):
         market_ = market_["market"]
-        print(market_)
+        # print(market_)
         marketObject, _ = orderbookModels.Market.objects.get_or_create(baseCurrencyCode = market_["base_currency_code"],
                                                                     counterCurrencyCode = market_["counter_currency_code"],
                                                                     marketCode = market_["market_code"])
-        # marketObject.save()
-        print(marketObject)
+        marketObject.save()
+        # print(marketObject)
         return marketObject
 
         
@@ -68,8 +68,8 @@ class MarketData(models.Model):
                                                             avg24h=float(marketdata_["avg_24h"]),
                                                             timestamp=float(marketdata_["timestamp"]),
                                                     )
-        # marketdataObject.save()
-        print(marketdataObject)
+        marketdataObject.save()
+        # print(marketdataObject)
 
 class Buyer(models.Model):
     market =  models.ForeignKey(Market, on_delete=models.CASCADE)
@@ -94,8 +94,8 @@ class Buyer(models.Model):
                                                         ordersTotalAmount=float(buyer["orders_total_amount"]),
                                                         ordersPrice=float(buyer["orders_price"]),
                                                         timestamp=float(timestamp))
-            # buyerObject.save()
-            print(buyerObject)
+            buyerObject.save()
+            # print(buyerObject)
 
 
 
@@ -122,8 +122,8 @@ class Seller(models.Model):
                                                         ordersTotalAmount=float(seller["orders_total_amount"]),
                                                         ordersPrice=float(seller["orders_price"]),
                                                         timestamp=float(timestamp))
-            # sellerObject.save()
-            print(sellerObject)
+            sellerObject.save()
+            # print(sellerObject)
 
 
 class Transaction(models.Model):
@@ -151,5 +151,5 @@ class Transaction(models.Model):
                                                                 price=float(transaction["price"]),
                                                                 time=float(transaction["time"]),
                                                                 type=transaction["type"])
-            # transactionObject.save()
-            print(transactionObject)
+            transactionObject.save()
+            # print(transactionObject)
